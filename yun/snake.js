@@ -1,6 +1,6 @@
 $(document).ready(function(){
 	
-	"use strict";
+	//"use strict";
 	//Canvas
 	var canvas =$("#canvas")[0];
 	var ctx = canvas.getContext("2d");
@@ -13,7 +13,7 @@ $(document).ready(function(){
 	var score;
 
 	var snake_array; //スネーク配列
-	var game_loop;
+	//var game_loop;
 
 	function init()
 	{
@@ -23,7 +23,7 @@ $(document).ready(function(){
 
 		score = 0;
 
-		if(typeof game_loop !== "undefined")
+		if(typeof game_loop != "undefined")
 		{clearInterval(game_loop);}
 		
 		
@@ -61,19 +61,19 @@ $(document).ready(function(){
 		var nx = snake_array[0].x;
 		var ny = snake_array[0].y;
 
-		if(d==="right"){ nx++;}
-		else if(d==="left") {nx--;}
-		else if(d==="up") {ny--;}
-		else if(d==="down") {ny++;}
+		if(d=="right"){ nx++;}
+		else if(d=="left") {nx--;}
+		else if(d=="up") {ny--;}
+		else if(d=="down") {ny++;}
 
-		if(nx === -1 || nx === w/cw || ny === -1 || ny === h/cw || check_collision(nx,ny,snake_array)){
+		if(nx == -1 || nx == w/cw || ny == -1 || ny == h/cw || check_collision(nx,ny,snake_array)){
 			//スネークが範囲外になるとリスタート
 			init();
 
 			return;
 		}
 		var tail;
-		if(nx === food.x && ny === food.y){
+		if(nx == food.x && ny == food.y){
 			tail = {x:nx,y:ny};
 			score++;
 			create_food();
@@ -108,7 +108,7 @@ $(document).ready(function(){
 
 	function check_collision(x,y,array){
 		for(var i=0; i < array.length; i++){
-			if(array[i].x === x && array[i].y === y){
+			if(array[i].x == x && array[i].y == y){
 				return true;
 			}
 		}
@@ -116,11 +116,16 @@ $(document).ready(function(){
 	}
 
 	$(document).keydown(function(e){
-		var key = e.which;
+		//var key = e.which;
 
-		if(key === "37" && d !== "right"){d="left";}
-		else if(key === "38" && d !== "down"){d="up";}
-		else if(key === "39" && d !== "left"){d="right";}
-		else if(key === "40" && d !== "up"){d="down";}
-	});
-});
+		//if(key == "37" && d != "right"){d="left";}
+		//else if(key == "38" && d != "down"){d="up";}
+		//else if(key == "39" && d != "left"){d="right";}
+		//else if(key == "40" && d != "up"){d="down";}
+
+		if(e.keyCode == "37" && d != "right"){d="left";}
+		else if(e.keyCode == "38" && d != "down"){d="up";}
+		else if(e.keyCode == "39" && d != "left"){d="right";}
+		else if(e.keyCode == "40" && d != "up"){d="down";}
+	})
+})
