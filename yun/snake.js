@@ -1,6 +1,8 @@
-$(document).redy(function(){
+$(document).ready(function(){
+	
+	"use strict";
 	//Canvas
-	var canvas = $("#canvas")[0];
+	var canvas =$("#canvas")[0];
 	var ctx = canvas.getContext("2d");
 	var w = $("#canvas").width();
 	var h = $("#canvas").height();
@@ -11,6 +13,7 @@ $(document).redy(function(){
 	var score;
 
 	var snake_array; //スネーク配列
+	var game_loop;
 
 	function init()
 	{
@@ -20,9 +23,9 @@ $(document).redy(function(){
 
 		score = 0;
 
-		if(typeof game_loop != "undefined"){
-			clearInterval(game_loop);
-		}
+		if(typeof game_loop !== "undefined")
+		{clearInterval(game_loop);}
+		
 		
 		game_loop = setInterval(paint, 60);
 	}
@@ -58,31 +61,32 @@ $(document).redy(function(){
 		var nx = snake_array[0].x;
 		var ny = snake_array[0].y;
 
-		if(d=="right") {nx++;}
-		else if(d=="left") {nx--;}
-		else if(d=="up") {ny--;}
-		else if(d=="down") {ny++;}
+		if(d==="right"){ nx++;}
+		else if(d==="left") {nx--;}
+		else if(d==="up") {ny--;}
+		else if(d==="down") {ny++;}
 
-		if(nx == -1 || nx == w/cw || ny == -1 || ny == h/cw || check_collision(nx,ny,snake_array)){
+		if(nx === -1 || nx === w/cw || ny === -1 || ny === h/cw || check_collision(nx,ny,snake_array)){
 			//スネークが範囲外になるとリスタート
 			init();
 
 			return;
 		}
-		if(nx == food.x && ny == food.y){
-			var tail = {x:nx,y:ny};
+		var tail;
+		if(nx === food.x && ny === food.y){
+			tail = {x:nx,y:ny};
 			score++;
 			create_food();
 		}
 		else{
-			var tail = snake_array.pop();
+			tail = snake_array.pop();
 			tail.x = nx;
 			tail.y = ny;
 		}
 
 		snake_array.unshift(tail);
 
-		for(var i=0; i<snake_arraylength; i++){
+		for(var i=0; i<snake_array.length; i++){
 			var c = snake_array[i];
 
 			paint_cell(c.x, c.y);
@@ -104,7 +108,7 @@ $(document).redy(function(){
 
 	function check_collision(x,y,array){
 		for(var i=0; i < array.length; i++){
-			if(array[i].x == x && array[i].y == y){
+			if(array[i].x === x && array[i].y === y){
 				return true;
 			}
 		}
@@ -114,9 +118,9 @@ $(document).redy(function(){
 	$(document).keydown(function(e){
 		var key = e.which;
 
-		if(key == "37" && d != "right"){d="left";}
-		else if(key == "38" && d != "down"){d="up";}
-		else if(key == "39" && d != "left"){d="right";}
-		else if(key == "40" && d != "up"){d="down";}
-	})
-})
+		if(key === "37" && d !== "right"){d="left";}
+		else if(key === "38" && d !== "down"){d="up";}
+		else if(key === "39" && d !== "left"){d="right";}
+		else if(key === "40" && d !== "up"){d="down";}
+	});
+});
