@@ -89,20 +89,23 @@ function keyPressed() {
 // SNAKE OBJECT
 
 function Snake() {
-  this.x =0;
-  this.y =0;
-  this.xspeed = 1;
-  this.yspeed = 0;
-  this.total = 0;
+  this.x =0; //餌
+  this.y =0;　//餌
+  this.xspeed = 1; //初動スピード
+  this.yspeed = 0; //初動の動き
+  this.total = 0;  //
   this.tail = [];
-  this.score = 1;
-  this.highscore = 1;
+  this.score = 0; //初期スコア数
+  this.highscore = 1; //初期ハイスコア数
 
   this.dir = function(x,y) {
+    if(this.xspeed == -x || this.yspeed == -y){
+      return;
+    }
     this.xspeed = x;
     this.yspeed = y;
   }
-
+  // 餌を食べたら…
   this.eat = function(pos) {
     var d = dist(this.x, this.y, pos.x, pos.y);
     if (d < 1) {
@@ -110,7 +113,7 @@ function Snake() {
       this.score++;
       text(this.score, 70, 625);
       if (this.score > this.highscore) {
-        this.highscore = this.score;
+        this.highscore = this.score;   //スコアがハイスコアより大きい場合、スコアとハイスコアが同数になる
       }
       text(this.highscore, 540, 625);
       return true;
