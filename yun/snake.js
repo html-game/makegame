@@ -2,10 +2,14 @@ $(document).ready(function(){
 	
 	//"use strict";
 	//Canvas
-	var canvas =$("#canvas")[0];
+	var canvas = $('#canvas')[0];
 	var ctx = canvas.getContext("2d");
-	var w = $("#canvas").width();
-	var h = $("#canvas").height();
+	var w = $('#canvas').width();
+	var h = $('#canvas').height();
+
+	//$('#canvas').attr('canvas',canvas);
+	//$('#canvas').attr('width',w);
+	//$('#canvas').attr('height',h);
 
 	var cw = 10;
 	var d;
