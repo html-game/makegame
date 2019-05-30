@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta lang="JA">
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<meta http-equiv="Content-Script-Type" content="text/javascript">
+		<meta http-equiv="Content-Style-Type" content="text/css">
+		<style type="text/css">
+		<!--
+			#c {
+			
+				padding: 0;
+				margin : 0;
+				
+				border : 0;
+			}
+			
+		-->
+		</style>
+		<script  src="imaeg-display.js"></script>
+		<script type="text/javascript">
+		<!--
+
+			window.onload = function () {
+
+				// canvas要素のノードオブジェクト
+				var canvas = document.getElementById('c');
+				
+				// canvas要素の存在チェックとCanvas未対応ブラウザの対処
+				if (!canvas || !canvas.getContext) {
+					return false;
+				}
+				
+				// 2Dコンテキスト
+				var ctx = canvas.getContext('2d');
+				
+				// Imageオブジェクトを生成
+				var img = new Image();
+				img.src = "img/player.png";
+				img.onload = function () {
+					// 画像を描画
+					ctx.drawImage(img, 0, 0);
+				};
+				
+			};
+
+		-->
+		</script>
+	</head>
+
+	<body>
+
+		<canvas id="c" width="320" height="240">
+		
+		</canvas>
+
+	</body>
+
+</html>
