@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta lang="JA">
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<meta http-equiv="Content-Script-Type" content="text/javascript">
+		<meta http-equiv="Content-Style-Type" content="text/css">
+		<style type="text/css">
+		<!--
+			#c {
+			    
+			    background-color:black;
+				
+				padding: 0;
+				margin : 0;
+				
+				border : 0;
+			}
+			
+		-->
+		</style>
+		<script src="main.js"></script>
+		<script type="text/javascript">
+		<!--
+            
+            window.requestAnimationFrame = 
+					window.requestAnimationFrame		||
+					window.webkitRequestAnimationFrame	||
+					window.mozRequestAnimationFrame		||
+					window.oRequestAnimationFrame		||
+					window.msRequestAnimationFrame		||
+					function(callback, element){
+						window.setTimeout(callback, 1000 / 60);
+					};
+			
+			var x = 100;
+			var y = 100;
+			
+			var move = 2;
+
+			var up    = false;
+			var down  = false;
+			var left  = false;
+			var right = false;
+			var z     = false;
+			
+			// canvas要素のノードオブジェクト
+			var canvas = null;
+			
+			// プレイヤー画像を描画する
+			var p = null;
+			
+			//　シュート
+			var shoot = new Array();
+			var shootDelay = 0;
+
+			window.onload = function () {
+
+				// canvas要素のノードオブジェクト
+				canvas = document.getElementById('c');
+				
+				// canvas要素の存在チェックとCanvas未対応ブラウザの対処
+				if (!canvas || !canvas.getContext) {
+					return false;
+				}
+				
+				// 2Dコンテキスト
+				var ctx = canvas.getContext('2d');
+				
+				// ImageManagerオブジェクトを生成し、すべての画像をロードする
+				var im = new ImageManager();
+				im.addImage("img/player.png");
+				im.load();
+
+				// プレイヤー画像を描画する
+				p = im.getImage("img/player.png");
+				ctx.drawImage(p, 0, 0);
+				
+				// キー押下イベントハンドリング
+				document.onkeydown = function (event) {
+				
+					if (event.keyCode == undefined) {
+						event.keyCode = event.which;
+					}
+				
+					if (event.keyCode == 37) {
+					
+						left = true;
+					} else if (event.keyCode == 38) {
+					
+						up = true;
+					} else if (event.keyCode == 39) {
+					
+						right = true;
+					} else if (event.keyCode == 40) {
+					
+						down = true;
+					} else if (event.keyCode == 90) {
+
+						z = true;
+					}
+				};
+				
+				// キー離しイベントハンドリング
+				document.onkeyup = function (event) {
+				
+					if (event.keyCode == undefined) {
+						event.keyCode = event.which;
+					}
+				
+					if (event.keyCode == 37) {
+					
+						left = false;
+					} else if (event.keyCode == 38) {
+					
+						up = false;
+					} else if (event.keyCode == 39) {
+					
+						right = false;
+					} else if (event.keyCode == 40) {
+					
+						down = false;
+					} else if (event.keyCode == 90) {
+
+						z = false;
+					}
+				};
+				
+				animationLoop();
+			};
+			
+			/**
+			 * アニメーションループ
+			 */
+			function animationLoop() {
+			
+				// キー操作処理の適用
+				if (up)    y-=move;
+				if (down)  y+=move;
+				if (left)  x-=move;
+				if (right) x+=move;
+			
+				// ショット
+				if (z && shootDelay <= 0) {
+					var s = new Object();
+					s.x = x +　(45 / 2);
+					s.y = y;
+
+					shoot[shoot.length] = s;
+
+					shootDelay = 10;
+				}
+
+				//　連続してショットできないようにする
+				if (shootDelay > 0) shootDelay--;
+
+				for (var i = 0; i < shoot.length; i++) {
+
+					shoot[i].y -= 3;
+
+					if (shoot[i].y <= -100) {
+
+						shoot.splice(i, 1);
+						i--;
+					}
+				}
+				
+
+				// 2Dコンテキスト
+				var ctx = canvas.getContext('2d');
+				
+				// クリア処理
+				ctx.fillStyle = 'rgb(0, 0, 0)';
+				ctx.fillRect(0, 0, 320, 240);
+				ctx.fill();
+				
+				// 描画処理
+				ctx.drawImage(p, x, y);
+				
+				for (var i = 0; i < shoot.length; i++) {
+				
+					ctx.fillStyle = 'rgb(255, 255, 255)';
+					ctx.fillRect(
+								  shoot[i].x - ( 5 / 2)
+								, shoot[i].y - (10 / 2)
+								, 5
+								, 10);
+				}
+
+
+				// ループの繰り返し
+				window.requestAnimationFrame(animationLoop);
+			}
+
+		-->				
+		</script>
+	</head>
+
+	<body>
+
+		<canvas id="c" width="320" height="240">
+		
+		</canvas>
+
+	</body>
+
+</html>
