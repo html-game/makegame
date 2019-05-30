@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta lang="JA">
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<meta http-equiv="Content-Script-Type" content="text/javascript">
+		<meta http-equiv="Content-Style-Type" content="text/css">
+		<style type="text/css">
+		<!--
+			#c {
+			    
+			    background-color:black;
+				
+				padding: 0;
+				margin : 0;
+				
+				border : 0;
+			}
+			
+		-->
+		</style>
+		<script src="main.js"></script>
+		<script type="text/javascript">
+		<!--
+            
+            window.requestAnimationFrame = 
+					window.requestAnimationFrame		||
+					window.webkitRequestAnimationFrame	||
+					window.mozRequestAnimationFrame		||
+					window.oRequestAnimationFrame		||
+					window.msRequestAnimationFrame		||
+					function(callback, element){
+						window.setTimeout(callback, 1000 / 60);
+					};
+			
+			// canvas要素のノードオブジェクト
+			var canvas = null;
+			
+			// シーン（メイン）
+			var scene = null;
+
+			// キーイベントを検出するオブジェクト
+			var key = null;
+
+			window.onload = function () {
+
+				// ImageManagerオブジェクトを生成し、すべての画像をロードする
+				var im = new ImageManager();
+				im.addImage("img/player.png");
+				im.addImage("img/enemy.png");
+				im.addImage("img/back-obj.png");
+				im.load();
+				
+				// シーン（メイン）
+				scene = new SceneMain(im);
+				scene.init();
+
+				// キーイベントを検出するオブジェクト
+				key = new KeyEvent(document);
+
+				// canvas要素のノードオブジェクト
+				canvas = document.getElementById('c');
+				
+				// canvas要素の存在チェックとCanvas未対応ブラウザの対処
+				if (!canvas || !canvas.getContext) {
+					return false;
+				}
+				
+				// 2Dコンテキスト
+				var ctx = canvas.getContext('2d');
+				
+				// ループを実行する
+				animationLoop();
+			};
+			
+			/**
+			 * アニメーションループ
+			 */
+			function animationLoop() {
+			
+				// 2Dコンテキスト
+				var ctx = canvas.getContext('2d');
+				
+				// シーンを動作させる
+				scene.action(key);
+				// シーンを描画する
+				scene.render(ctx);
+			
+				// ループの繰り返し
+				window.requestAnimationFrame(animationLoop);
+			}
+
+		-->				
+		</script>
+	</head>
+
+	<body>
+
+		<canvas id="c" width="640" height="480">
+		
+		</canvas>
+
+	<p>
+			HTML5でシューティング - Ver 0.4
+		</p>
+		<p>
+			十字キーで移動、Zキーで弾発射。IMEをオフにしてください。
+		</p>
+		<p>
+			画像素材の提供 <a href="http://game.yu-nagi.com/index.htm" target="_blank">http://game.yu-nagi.com/index.htm</a>
+		</p>
+
+    </body>
+
+</html>
