@@ -1,78 +1,80 @@
+// ---------------------------------------------------------
+// �Q�[���p��javascript���C�u����
+// ---------------------------------------------------------
+// 画面の大きさ(縦、横)
 var S_WIDTH  = 640;
 var S_HEIGHT = 480;
-
+// タイトルシーンの定義
 var SceneTitle = function (imageManager) {
 
 	this.imageManager = imageManager;
 	this.imageTitle   = this.imageManager.getImage("img/title.png");
 };
 
+// タイトルシーンの原型
 SceneTitle.prototype = {
 
 	init : function () {
 	
 	},
-
+	// 動作
 	action : function (keyEvent) {
 
-		// �X�^�[�g
+		// Zを押した時の動作
 		if (keyEvent.z) {
 		
-			// ���C���V�[����ԋp����
+			// Zをおしたらメインシーンが始まる
 			return new SceneMain(this.imageManager);
 		}
 		
 		return null;
 	}, 
-
+    //描写
 	render : function (ctx) {
 		
-		// �w�i���N���A����
+		// シーンの塗りつぶし
 		ctx.fillStyle = 'rgb(0, 0, 0)';
-		ctx.fillRect(
-					  0
-					, 0
-					, S_WIDTH
-					, S_HEIGHT);
+		ctx.fillRect( 0 , 0 , S_WIDTH , S_HEIGHT );
 
-		// �^�C�g����`�悷��
+		// canvas上に指定の画像を描画
 		ctx.drawImage(this.imageTitle, S_WIDTH / 2 - 299 / 2, 150);
 		
-		/* �t�H���g�X�^�C�����` */
+		/* タイトル　フォントサイズ */
 		ctx.font = "35px '�l�r �S�V�b�N'";
+		// 線のスタイルカラー
 		ctx.strokeStyle = "green";
-	
+		// タイトルメッセージ
 		var MESSAGE = "Press z key to Start";
-		
+		// テキストの描画幅を測定
 		var metricsLabel = ctx.measureText(MESSAGE);
 		
-		/* �F��strokText */
-		ctx.strokeText(MESSAGE
-						, S_WIDTH / 2 - metricsLabel.width / 2
-						, S_HEIGHT / 2);
+		/*指定座標に描画する*/
+		ctx.strokeText(MESSAGE, S_WIDTH / 2 - metricsLabel.width / 2 , S_HEIGHT / 2);
 	},
 	
 };
 
+// メインシーン（プレイシーン）の定義
 var SceneMain = function (imageManager) {
 
 	this.imageManager = imageManager;
 
-	this.player        = new Player(imageManager.getImage("img/player.png"));
-	this.playerBullets = new Array();
-	this.objects       = new Array();
-	this.deadObjects   = new Array();
-	this.backObjects   = new Array();
+	this.player        = new Player(imageManager.getImage("img/player.png"));　//プレイヤーインスタンス
+	this.playerBullets = new Array();　　　　　　　　　　　　　　　　　　　　　　　//弾インスタンス
+	this.objects       = new Array();　　　　　　　　　　　　　　　　　　　　　　　//対象インスタンス
+	this.deadObjects   = new Array();　　　　　　　　　　　　　　　　　　　　　　　//死の対象インスタンス
+	this.backObjects   = new Array();　　　　　　　　　　　　　　　　　　　　　　　//背景物(月の画像)の対象インスタンス
 	
-	this.score         = new Score(this.player);
-	this.life          = new Life(this.player);
+	this.score         = new Score(this.player);　　　　　　　　　　　　　　　　　//スコア
+	this.life          = new Life(this.player);　　　　　　　                   //ライフ
 	
-	this.diffcult = 100;
+	this.diffcult = 100;              //不具合
 	
-	this.gameover = false;
-	this.gameoverTime = 300;
+	this.gameover = false;            //ゲームオーバー　　　　　　　　　　　　　　　　　　　　　　　
+	this.gameoverTime = 300;          //ゲームオーバーからタイトルの戻るまでの時間（３秒）
 };
 
+// メインシーンの原型
 SceneMain.prototype = {
 
 	init : function () {
@@ -80,11 +82,11 @@ SceneMain.prototype = {
 		this.score.init();
 		this.life.init();
 
-		// �v���C���[�̏����ʒu��ݒ肷��
+		// プレイヤー座標　[iw(image width)=プレイヤー画像の幅]  [ih(image heigth)=プレイヤー画像の高さ]
 		this.player.x = S_WIDTH  / 2 - this.player.iw / 2;
 		this.player.y = S_HEIGHT     - this.player.ih - 30;
 		
-		// �o�b�N�I�u�W�F�N�g��ǉ�����
+		// 背景物（月の画像）の定義
 		var b = new BackObj(this.imageManager.getImage("img/back-obj.png"));
 		b.init();
 		this.backObjects.push(b);
@@ -93,7 +95,7 @@ SceneMain.prototype = {
 		this.gameoverTime = 300;
 
 	},
-
+　　　// 動作
 	action : function (keyEvent) {
 
 		this.gameoverTime--;
@@ -105,17 +107,17 @@ SceneMain.prototype = {
 			return new SceneTitle(this.imageManager);
 			
 		}
-
+        // 乱数を定義＝0～99の整数値の乱数を生成
 		var rand = Math.floor( Math.random() * 100 );
 		
-		// N�̔{���̏ꍇ
+		// 
 		if (rand % this.diffcult == 0) {
 
 			var randXOffset = Math.floor( Math.random() * 570 ) + 10;
 			
 			var rand = Math.floor( Math.random() * 100 );
 			
-			// 7�̔{���̏ꍇ
+			// 敵２の出現確率
 			if (rand % 7 == 0) {
 			
 				var o = new EnemyDash(this.imageManager.getImage("img/enemy-dash.png"), this.player);
@@ -125,7 +127,7 @@ SceneMain.prototype = {
 				
 				this.objects.push(o);
 			
-			// ����ȊO
+			// 敵１の出現確率
 			} else {
 			
 			
@@ -147,20 +149,18 @@ SceneMain.prototype = {
 		// ------------------------------------------
 		// �����蔻��
 		// ------------------------------------------
-		// �v���C���[�Ɖ�ʗ̈�̓����蔻��
+		// 内部スクリーンの調整
 		this.adjustInnerScreen(this.player);
 
 		if (!this.player.star) {
 		
-			// �v���C���[�Ƃ��̑��I�u�W�F�N�g�Ƃ̓����蔻��
+			//　対象の繰り返し処理 
 			for (i = 0; i < this.objects.length; i++) {
 				
-				// HIT���Ă���
-				if (
-					this.isHit(this.objects[i], this.player)      ||
-					this.isHit(this.player    , this.objects[i]) )  {
+				// objects(対象＝敵)　プレイヤーが敵に当たった場合の繰り返し処理
+				if (　this.isHit(this.objects[i], this.player)  ||　this.isHit(this.player  , this.objects[i]) )  {
 
-					// �v���C���[�ƁA�q�b�g�����I�u�W�F�N�g�̑ϋv�͂�������
+					// プレイヤーと敵のヒットポイント
 					this.player.hp     -= this.objects[i].attack;
 					this.objects[i].hp -= this.player.attack;
 					
@@ -172,17 +172,16 @@ SceneMain.prototype = {
 			}
 		}
 
-		// �v���C���[�o���b�g�Ƃ��̑��I�u�W�F�N�g�Ƃ̓����蔻��
+		// 対象の繰り返し処理 
 		for (i = 0; i < this.objects.length; i++) {
 			
+			// プレイヤーの弾丸の繰り返し処理
 			for (j = 0; j < this.playerBullets.length; j++) {
 			
-				// HIT���Ă���
-				if (
-					this.isHit(this.objects[i]      , this.playerBullets[j] )      ||
-					this.isHit(this.playerBullets[j], this.objects[i])      )  {
+				// 弾丸が敵に当たった場合
+				if (this.isHit(this.objects[i] , this.playerBullets[j] ) ||　this.isHit(this.playerBullets[j]　, this.objects[i]))  {
 
-					// �v���C���[�ƁA�q�b�g�����I�u�W�F�N�g�̑ϋv�͂�������
+					// 弾丸と敵のヒットポイント
 					this.playerBullets[j].hp  -= this.objects[i].attack;
 					this.objects[i].hp        -= this.playerBullets[j].attack;
 					
@@ -192,12 +191,12 @@ SceneMain.prototype = {
 			
 		}
 		
-		// �Q�[���I�[�o�[
+		// プレイヤーの死＝ヒットポイント（ライフ）が０以下の場合
 		if (!this.player.dead && this.player.hp <= 0) {
 			
-			// �Q�[���I�[�o�[
+			// プレイヤーは死ぬ
 			this.player.dead = true;
-			// �f�b�h�I�u�W�F�N�g�𐶐�����
+			// 死の対象の生成
 			this.generateDeadObj(this.player);
 			
 			this.gameover = true;
@@ -206,10 +205,10 @@ SceneMain.prototype = {
 		
 		for (i = 0; i < this.objects.length; i++) {
 			
-			// �I�u�W�F�N�g�̑ϋv�͂��Ȃ��Ȃ����ꍇ�A��������
+			// 対象（敵)のヒットポイント（ライフ）が０以下の場合
 			if (this.objects[i].hp <= 0) {
 				
-				// �f�b�h�I�u�W�F�N�g�𐶐�����
+				// 死の対象の生成
 				this.generateDeadObj(this.objects[i]);
 			
 				this.objects.splice(i, 1);
@@ -217,10 +216,10 @@ SceneMain.prototype = {
 				
 				break;
 			}
-			// �I�u�W�F�N�g���̈�O�ɓ��B�����ꍇ�A��������
+			// また範囲外（死なない）の場合
 			else if (this.isOutOfRange(this.objects[i])) {
 
-				// �f�b�h�I�u�W�F�N�g�𐶐�����
+				// 死の対象の生成
 				this.generateDeadObj(this.objects[i]);
 			
 				this.objects.splice(i, 1);
@@ -229,16 +228,17 @@ SceneMain.prototype = {
 			}
 		}
 		
+		// 弾丸の繰り返し処理
 		for (i = 0; i < this.playerBullets.length; i++) {
 			
-			// �I�u�W�F�N�g�̑ϋv�͂��Ȃ��Ȃ����ꍇ�A��������
+			//　弾が当たらなかった場合
 			if (this.playerBullets[i].hp <= 0) {
 			
 				this.playerBullets.splice(i, 1);
 				i--;
 				continue;
 			}
-			// �o���b�g���̈�O�ɓ��B�����ꍇ�A��������
+			// また範囲外の場合
 			else if (this.isOutOfRange(this.playerBullets[i])) {
 				this.playerBullets.splice(i, 1);
 				i--;
@@ -248,7 +248,7 @@ SceneMain.prototype = {
 		
 
 		// ------------------------------------------
-		// ��������肷��
+		// スコアとライフの実行
 		// ------------------------------------------
 		this.score.action();
 		this.life.action();
@@ -278,16 +278,12 @@ SceneMain.prototype = {
 
 	render : function (ctx) {
 		
-		// �w�i���N���A����
+		// シーンの塗りつぶし
 		ctx.fillStyle = 'rgb(0, 0, 0)';
-		ctx.fillRect(
-					  0
-					, 0
-					, S_WIDTH
-					, S_HEIGHT);
+		ctx.fillRect( 0 , 0 , S_WIDTH , S_HEIGHT);
 
 		// ------------------------------------------
-		// �`�悷��
+		// スコアとライフの描写
 		// ------------------------------------------
 		this.score.render(ctx);
 		this.life.render(ctx);
@@ -299,7 +295,7 @@ SceneMain.prototype = {
 		for (i = 0; i < this.objects.length; i++) {
 			this.objects[i].render(ctx);
 		}
-
+　　　　　//プレイヤーの描写
 		this.player.render(ctx);
 		
 		for (i = 0; i < this.playerBullets.length; i++) {
@@ -311,7 +307,7 @@ SceneMain.prototype = {
 		}
 		
 	},
-	
+	// 死のオブジェクトの生成
 	generateDeadObj : function (obj) {
 	
 		var d = new DeadObj(obj);
@@ -320,8 +316,11 @@ SceneMain.prototype = {
 		this.deadObjects.push(d);
 	}, 
 	
+
+	// 当たり判定の範囲＝敵同士が重なる
 	isHit : function (obj1, obj2) {
 		
+		// 敵１・敵２の左(left)、右(right)、上(top)、下(below)の定義
 		var obj1L = obj1.x + (obj1.iw / 2) - (obj1.w / 2);
 		var obj1R = obj1.x + (obj1.iw / 2) + (obj1.w / 2);
 		var obj1T = obj1.y + (obj1.ih / 2) - (obj1.h / 2);
@@ -332,9 +331,9 @@ SceneMain.prototype = {
 		var obj2T = obj2.y + (obj2.ih / 2) - (obj2.h / 2);
 		var obj2B = obj2.y + (obj2.ih / 2) + (obj2.h / 2);
 		
-		// 4�ӂ̓����蔻��`�F�b�N
+		// 敵１と敵２がそれぞれが全方向から重なっても問題がおきないようにするif文
 		
-		// ����
+		// 
 		if (obj1L <= obj2L && obj2L <= obj1R &&
 			obj1T <= obj2T && obj2T <= obj1B) {
 			
@@ -365,9 +364,9 @@ SceneMain.prototype = {
 		return false;
 	},
 
-	
+	// 範囲外の余白
 	isOutOfRange : function (obj) {
-	
+	　　　//余白の定義（範囲外）
 		var X_MARGIN = 100;
 		var Y_MARGIN = 100;
 	
@@ -398,8 +397,10 @@ SceneMain.prototype = {
 		return false;
 	},
 	
+
+	// 内部スクリーンの余白
 	adjustInnerScreen : function (obj) {
-	
+	　　　//余白の座標の定義（内部スクリーン）
 		var X_MARGIN = 50;
 		var Y_MARGIN = 50;
 	
@@ -432,37 +433,41 @@ SceneMain.prototype = {
 
 };
 
+// 弾丸の定義
 var PlayerBullet = function (image) {
 
-	this.x       =  0;
-	this.y       =  0;
-	this.w       =  5;
-	this.h       = 10;
-	this.iw      =  5;
-	this.ih      = 10;
+	this.x       =  0;   //縦座標
+	this.y       =  0;   //横座標
+	this.w       =  5;   //幅
+	this.h       = 10;   //高さ
+	this.iw      =  5;   //画像幅
+	this.ih      = 10;   //画像高さ
 	
-	this.move    = 4;
+	this.move    = 4;    //弾丸の移動
 	
-	this.hp      =  1;
-	this.attack  =  2;
+	this.hp      =  1;   //与えるダメージ量（ヒットポイント）
+	this.attack  =  2;   
 	
 	this.image = image;
 	
-	this.alpha  = 1.0;
+	this.alpha  = 1.0;   //
 	this.alphaA = 0.01;
 };
 
+// プレイヤーの弾丸の原型
 PlayerBullet.prototype = {
 
 	init : function () {
 	
 	}, 
 	
+	// 動作
 	action : function (keyEvent) {
 	
 		this.y -= this.move;
 	},
 
+	// 描写
 	render : function (ctx) {
 	
 		if (this.alpha >= 1.0) {
@@ -473,16 +478,13 @@ PlayerBullet.prototype = {
 		
 		this.alpha += this.alphaA;
 	
-		// �`�揈��
+		// 弾丸シーンの塗りつぶし
 		ctx.fillStyle = 'rgba(255, 255, 255, ' + this.alpha + ')';
-		ctx.fillRect(
-					  this.x
-					, this.y
-					, this.w
-					, this.h);
+		ctx.fillRect(this.x　, this.y , this.w , this.h);
 	}
 };
 
+// プレイヤーの定義
 var Player = function (image) {
 
 	this.x       = 0;
@@ -494,12 +496,12 @@ var Player = function (image) {
 	
 	this.move    = 3;
 	
-	this.hp      = 3;
+	this.hp      = 3;   //ライフの数
 	this.attack  = 1;
 	
 	this.image = image;
 	
-	this.shootDelay = 0;
+	this.shootDelay = 0;   //弾丸の発射遅れ
 	
 	this.dead      = false;
 	this.star      = false; // ���G�t���O
@@ -509,33 +511,33 @@ var Player = function (image) {
 	this.left1Up      = false;
 	this.left2Press   = false;
 	
-	this.leftLatestPressTime = 0;
-	this.leftLatestUpTime = 0;
+	this.leftLatestPressTime = 0;   //最新のプレス時間
+	this.leftLatestUpTime = 0;      //最新の更新日時
 	
 	this.leftDash     = false;
 	this.leftDashTime = 0;
 };
-
+// プレイヤー原型
 Player.prototype = {
 	
 	init : function () {
 	
 	}, 
-	
+	// 動作
 	action : function (keyEvent) {
 	
 		if (this.dead) {
 			
 			return;
 		}
-		
+		// xを押すと移動スピードが半分になる
 		if (keyEvent.x)    {
 			this.move = 1.5;
 		} else {
 			this.move = 3;
 		}
 	
-		// �L�[���쏈���̓K�p
+		// 移動したときの座標
 		if (keyEvent.up)    {
 			this.y -= this.move;
 		}
@@ -623,7 +625,7 @@ Player.prototype = {
 
 		var s = null;
 		
-		// �V���b�g
+		// zが押されたとき
 		if (keyEvent.z && this.shootDelay <= 0) {
 			s = new PlayerBullet();
 			s.init();
@@ -633,7 +635,7 @@ Player.prototype = {
 			this.shootDelay = 10;
 		}
 
-		// �A�����ăV���b�g�ł��Ȃ��悤�ɂ���
+		// 
 		if (this.shootDelay > 0) this.shootDelay--;
 
 		this.starTime--;
@@ -659,21 +661,22 @@ Player.prototype = {
 		
 			if (this.starTime % 5 == 0) {
 			
-				// �_�ł�����
+				// 
 			} else {
-				// �`�揈��
+				// プレイヤー画像の描画
 				ctx.drawImage(this.image, this.x, this.y);
 			}
-		} else {
+			
+			} else {
 	
-			// �`�揈��
+			// �
 			ctx.drawImage(this.image, this.x, this.y);
 		
 		}
 	}
 
 };
-
+// 敵１の定義
 var Enemy = function (image) {
 
 	this.x       = 0;
@@ -683,14 +686,14 @@ var Enemy = function (image) {
 	this.iw      = 38;
 	this.ih      = 42;
 	
-	this.move    = 2;
+	this.move    = 2;    // 移動スピード
 	
-	this.hp      = 1;
-	this.attack  = 1;
+	this.hp      = 1;    // ヒットポイント（ライフ）
+	this.attack  = 1;    // 攻撃力
 	
 	this.image = image;
 };
-
+// 敵の原型
 Enemy.prototype = {
 	
 	init : function () {
@@ -698,17 +701,17 @@ Enemy.prototype = {
 	}, 
 	
 	action : function () {
-	
+	    // 下方向に移動してくる
 		this.y += this.move;
 	},
 
 	render : function (ctx) {
 	
-		// �`�揈��
+		// 敵１の画像描画
 		ctx.drawImage(this.image, this.x, this.y);
 	}
 };
-
+// 敵２の定義
 var EnemyDash = function (image, player) {
 
 	this.x       = 0;
@@ -730,7 +733,7 @@ var EnemyDash = function (image, player) {
 	this.player = player;
 	this.dash     = false;
 };
-
+// 敵２の原型
 EnemyDash.prototype = {
 	
 	init : function () {
@@ -747,7 +750,7 @@ EnemyDash.prototype = {
 		this.x += this.moveX;
 		this.y += this.moveY;
 		
-		// ��ʂ�3����1������𒴂���ƁE�E�E
+		// 
 		if (!this.dash && this.y >= S_HEIGHT / 3) {
 		
 			var px = this.player.x + this.player.iw / 2;
@@ -784,7 +787,7 @@ EnemyDash.prototype = {
 		ctx.drawImage(this.image, this.x, this.y);
 	}
 };
-
+//　死の定義
 var DeadObj = function (obj) {
 
 	this.x       =  0;
@@ -811,7 +814,7 @@ var DeadObj = function (obj) {
 	
 	this.obj = obj;
 };
-
+// 死の対象の原型
 DeadObj.prototype = {
 	
 	init : function () {
@@ -862,33 +865,33 @@ DeadObj.prototype = {
 	
 		// �`�揈��
 		
-		/* �~ #1 */
+		/*プレイヤーの描写*/
 		ctx.beginPath();
 		ctx.fillStyle = this.color;
-		ctx.arc(this.x1, this.y1,  5, 0, Math.PI*2, false);
+		ctx.arc(this.x1 , this.y1 , 5 , 0 , Math.PI*2 , false);
 		ctx.fill();
-		/* �~ #2 */
+		/*敵１の描写*/
 		ctx.beginPath();
 		ctx.fillStyle = this.color;
-		ctx.arc(this.x2, this.y2,  5, 0, Math.PI*2, false);
+		ctx.arc(this.x2 , this.y2 , 5 , 0 , Math.PI*2 , false);
 		ctx.fill();
-		/* �~ #3 */
+		/*敵２の描写*/
 		ctx.beginPath();
 		ctx.fillStyle = this.color;
-		ctx.arc(this.x3, this.y3,  5, 0, Math.PI*2, false);
+		ctx.arc(this.x3 , this.y3 , 5 , 0 , Math.PI*2 , false);
 		ctx.fill();
 	}
 };
-
+// 背景画像の定義
 var BackObj = function (image) {
-
+    // 座標と大きさ
 	this.x       = 50;
 	this.y       =  0;
 	this.w       = 100;
 	this.h       = 100;
 	this.iw      = 100;
 	this.ih      = 100;
-	
+	// 動くスピード
 	this.move    = 0.05;
 	
 	this.hp      = 0;
@@ -896,7 +899,7 @@ var BackObj = function (image) {
 	
 	this.image = image;
 };
-
+// 背景画像の原型
 BackObj.prototype = {
 	
 	init : function () {
@@ -916,18 +919,18 @@ BackObj.prototype = {
 
 	render : function (ctx) {
 	
-		// �`�揈��
+		// 背景画像の描画
 		ctx.drawImage(this.image, this.x, this.y);
 	}
 };
-
+// スコアの定義
 var Score = function (player) {
 
 	this.player  = player;
 	this.x       = 50;
 	this.y       =  0;
 };
-
+// スコアの原型
 Score.prototype = {
 	
 	init : function () {
@@ -937,9 +940,9 @@ Score.prototype = {
 		
 		this.score = 0;
 	}, 
-	
+	//　プレイヤーが死ぬまで増え続ける
 	action : function () {
-	
+	    
 		if (!this.player.dead) {
 		
 			this.score++;
@@ -954,7 +957,7 @@ Score.prototype = {
 		var X_MARGIN = 5;
 		var Y_MARGIN = 5;
 		
-		/* �t�H���g�X�^�C�����` */
+		/* フォントのサイズ・線のカラー */
 		ctx.font = "25px '�l�r �S�V�b�N'";
 		ctx.fillStyle = "green";
 		ctx.strokeStyle = "green";
@@ -962,7 +965,7 @@ Score.prototype = {
 		var metricsLabel = ctx.measureText(LABEL);
 		var metrics      = ctx.measureText(scoreStr);
 		
-		/* �F��strokText */
+		/* 指定座標に描画する*/
 		ctx.strokeText(LABEL
 						, this.x - metrics.width - metricsLabel.width - X_MARGIN
 						, this.y + 20 + Y_MARGIN);
@@ -971,14 +974,14 @@ Score.prototype = {
 						, this.y + 20 + Y_MARGIN);
 	}
 };
-
+// ライフの定義
 var Life = function (player) {
 
 	this.player  = player;
 	this.x       = 50;
 	this.y       =  0;
 };
-
+// ライフの原型
 Life.prototype = {
 	
 	init : function () {
@@ -1001,7 +1004,7 @@ Life.prototype = {
 		var X_MARGIN = -230;
 		var Y_MARGIN = 5;
 		
-		/* �t�H���g�X�^�C�����` */
+		/* フォントのサイズ・線のカラー */
 		ctx.font = "25px '�l�r �S�V�b�N'";
 		ctx.fillStyle = "green";
 		ctx.strokeStyle = "green";
@@ -1009,7 +1012,7 @@ Life.prototype = {
 		var metricsLabel = ctx.measureText(LABEL);
 		var metrics      = ctx.measureText(lifeStr);
 		
-		/* �F��strokText */
+		/*　指定座標に描画する */
 		ctx.strokeText(LABEL
 						, this.x - metrics.width - metricsLabel.width + X_MARGIN
 						, this.y + 20 + Y_MARGIN);
@@ -1020,9 +1023,7 @@ Life.prototype = {
 };
 
 // ---------------------------------------------------------
-/**
- * KeyEvent�R���X�g���N�^�B
- */
+// キーイベントの定義
 var KeyEvent = function (d) {
 
 	this.left   = false;
@@ -1034,24 +1035,22 @@ var KeyEvent = function (d) {
 	this.x      = false;
 	
 	var me = this;
-	
+	// キーが押されたとき
 	d.onkeydown = function (event) {
 		me.keyDown(me, event);
 	};
-	
+	// 押していたキーをあげた時
 	d.onkeyup   = function (event) {
 		me.keyUp(me, event);
 	};
 };
 
-/**
- * KeyEvent�����o��`
- */
+// キーイベントの原型
 KeyEvent.prototype = {
 
-	/**
-	 * �C���[�W��ǉ�����B
-	 */
+	
+	 
+	// キーが押されたら
 	keyDown : function (me, event) {
 	
 		if (event.keyCode == undefined) {
@@ -1080,9 +1079,7 @@ KeyEvent.prototype = {
 		
 	},
 	
-	/**
-	 * �C���[�W��ǉ�����B
-	 */
+	// キーが離れたら
 	keyUp : function (me, event) {
 	
 		if (event.keyCode == undefined) {
@@ -1112,27 +1109,21 @@ KeyEvent.prototype = {
 	}
 };
 
-/**
- * ImageManager�R���X�g���N�^�B
- */
+// 画像の管理　定義
 var ImageManager = function () {
 
-	// �C���[�W�i�[�p���X�g
+	// 画像インスタンス
 	this.images = new Array();
 	this.imagesCount = 0;
-	// �C���[�W���[�h�����J�E���g
+	// ロード数
 	this.loadCount = 0;
 	
 };
 
-/**
- * ImageManager�����o��`
- */
+// 画像管理の原型
 ImageManager.prototype = {
 
-	/**
-	 * �C���[�W��ǉ�����B
-	 */
+	// 画像の追加
 	addImage : function (imgUrl) {
 	
 		imgUrl = imgUrl.replace(/\?.*/, "");
@@ -1145,22 +1136,18 @@ ImageManager.prototype = {
 		this.imagesCount++;
 	},
 	
-	/**
-	 * �C���[�W���擾����B
-	 */
+	// 画像の取得
 	getImage : function (imgUrl) {
 	
 		return this.images[imgUrl];
 	},
 
-	/**
-	 * ���[�h���ꂽ�C���[�W�̌������J�E���g����B
-	 */
+	// ロードした画像の数
 	countLoadedImages : function () {
 	
 		this.loadCount = 0;
 		
-		// �C���[�W���������[�h����
+		// 画像urlの繰り返し処理
 		for (var imgUrl in this.images) {
 			
 			var img = this.images[imgUrl];
@@ -1172,14 +1159,12 @@ ImageManager.prototype = {
 		}
 	}, 
 	
-	/**
-	 * �C���[�W�̃��[�h����B
-	 */
+	// 負荷
 	load : function () {
 	
 		var me = this;
 		
-		// �C���[�W�̃��[�h����������܂őҋ@����֐�
+		// ロードした画像の数の用意
 		var wait = function() {
 		
 			me.countLoadedImages();
