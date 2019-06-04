@@ -1,0 +1,623 @@
+<!DOCTYPE HTML>
+<HTML>
+<HEAD>
+	<TITLE>シューティングゲーム：ステップ１</TITLE>
+	<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
+	<LINK REL="stylesheet" TYPE="text/css" HREF="../../../master.css">
+	<script>
+		mp = null;   // MainPanel オブジェクト
+	
+				//
+				// MainPanel の開始
+				//
+	function mp_start()
+	{
+						// キャンバス情報
+		var canvas = document.getElementById('canvas_e');   // キャンバス要素の取得
+		var ctx    = canvas.getContext('2d');   // キャンバスからコンテキストを取得
+						// MainPanel オブジェクト
+		mp = new MainPanel(canvas, ctx);
+						// StartPanel の表示
+		st_start();
+	}
+				//
+				// MainPanel オブジェクト（プロパティ）
+				//
+	function MainPanel(canvas, ctx)
+	{
+		this.canvas = canvas;   // キャンバス要素
+		this.ctx    = ctx;   // キャンバスのコンテキスト
+		this.level  = 1;   // ゲームレベル
+		return this;
+	}
+				//
+				// MainPanel オブジェクト（メソッド）				//
+	MainPanel.prototype.finish = function()
+	{
+						// キャンバスのクリア
+		mp.ctx.clearRect(0, 0, mp.canvas.width, mp.canvas.height);
+						// ボタンを非表示
+		document.getElementById('method').style.display = "none";
+		document.getElementById('start').style.display = "none";
+		document.getElementById('first').style.display = "none";
+		document.getElementById('finish').style.display = "none";
+		document.getElementById('clear').style.display = "none";
+		document.getElementById('over').style.display = "none";
+	}
+				
+    </script>
+    <script>
+    	// StartPanel の開始
+			//
+function st_start()
+{
+	mp.level = 1;   // ゲームレベルの設定
+					// キャンバスのクリア
+	mp.ctx.clearRect(0, 0, mp.canvas.width, mp.canvas.height);
+					// ゲームタイトルの表示
+	mp.ctx.font = "40px 'ＭＳ ゴシック'";
+	mp.ctx.textBaseline = "middle";
+	mp.ctx.textAlign = "center";
+	mp.ctx.fillStyle = "rgb(0, 0, 0)";
+	mp.ctx.fillText("シューティングゲーム", mp.canvas.width/2, mp.canvas.height/2);
+					// ボタンの表示制御
+	document.getElementById('method').style.display = "";
+	document.getElementById('start').style.display = "";
+	document.getElementById('first').style.display = "none";
+	document.getElementById('finish').style.display = "none";
+	document.getElementById('start').innerHTML = "ゲーム開始";
+	document.getElementById('clear').style.display = "none";
+	document.getElementById('over').style.display = "none";
+}
+				
+    </script>
+    <script>
+    	gp = null;   // GamePanel オブジェクト
+	
+				//
+				// GamePanel の開始
+				//
+	function gp_start()
+	{
+						// GamePanel オブジェクト
+		gp = new GamePanel();
+						// タイマーのスタート
+		gp.timerID = setInterval('gp.timer()', 10);
+						// キーリスナの追加（キーが押された時）
+		mp.canvas.addEventListener("keydown", gp.onKeyDown, false);
+		mp.canvas.focus();
+						// ボタンの表示制御
+		document.getElementById('method').style.display = "none";
+		document.getElementById('start').style.display = "none";
+		document.getElementById('first').style.display = "none";
+		document.getElementById('finish').style.display = "none";
+	}
+				//
+				// GamePanel オブジェクト（プロパティ）
+				//
+	function GamePanel()
+	{
+		this.timerID = -1;
+		this.ct = 0;   // カウンタ
+		this.my = new My();   // 自機
+		this.bs = new Boss();   // ボス
+		this.no = 2;   // 敵機の数
+		this.em = new Array();   // 敵機
+		this.em[0] = new Enemy(0, this.bs);
+		this.em[1] = new Enemy(1, this.bs);
+						// 敵機の存在
+		this.ex = new Array();
+		if (mp.level == 1) {
+			this.ex[0] = false;
+			this.ex[1] = false;
+	}
+		else {
+			this.ex[0] = true;
+			this.ex[1] = true;
+		}
+		return this;
+	}
+				//
+				// GamePanel オブジェクト（メソッド timer）
+				//
+	GamePanel.prototype.timer = function()
+	{
+						// 描画
+		gp.draw();
+						// 移動処理
+		if (gp.ct%3 == 0)
+			gp.my.bl.move();   // 自機の弾
+		if (gp.ct%5 == 0) {
+			gp.bs.move();   // ボスと敵機の移動
+			for (var i1 = 0; i1 < gp.no; i1++) {   // 敵機の弾
+				if (gp.ex[i1])
+					gp.em[i1].bl.move(gp.em[i1]);
+			}
+		}
+		if (gp.ct%10 == 0)
+			gp.bs.bl.move();   // ボスの弾
+						// 自機の弾による命中判定
+		var hit = false;
+								// ボスに対して
+		for (var i1 = 0; i1 < gp.my.bl.no && !hit; i1++) {
+			if (gp.my.bl.ex[i1]) {
+				var xb = gp.my.bl.x[i1];
+				var yb = gp.my.bl.y[i1];
+     			var w  = gp.bs.width / 2 + gp.my.bl.r;
+				var h  = gp.bs.height / 2 + gp.my.bl.r;
+				var xt = gp.bs.x + gp.bs.width / 2;
+				var yt = gp.bs.y + gp.bs.height / 2;
+				if (xb > xt-w && xb < xt+w && yb > yt-h && yb < yt+h) {
+					gp.my.bl.ex[i1] = false;
+					gp.bs.h_ct++;
+					if (gp.bs.h_ct > gp.bs.h_max) {
+						hit = true;
+						clearInterval(gp.timerID);   // タイマーの停止
+						gcp_start();   // ゲームクリア
+					}
+				}
+			}
+		}
+								// 敵機に対して
+		if (!hit) {
+			for (var i1 = 0; i1 < gp.no && !hit; i1++) {
+				if (gp.ex[i1]) {
+					for (var i2 = 0; i2 < gp.my.bl.no && !hit; i2++) {
+						if (gp.my.bl.ex[i2]) {
+							var xb = gp.my.bl.x[i2];
+							var yb = gp.my.bl.y[i2];
+							var w  = gp.em[i1].width / 2 + gp.my.bl.r;
+							var h  = gp.em[i1].height / 2 + gp.my.bl.r;
+							var xt = gp.em[i1].x + gp.em[i1].width / 2;
+							var yt = gp.em[i1].y + gp.em[i1].height / 2;
+							if (xb > xt-w && xb < xt+w && yb > yt-h && yb < yt+h) {
+								hit = true;
+								gp.ex[i1] = false;
+								gp.my.bl.ex[i2] = false;
+							}
+						}
+					}
+106				}
+			}
+		}
+						// ボスの弾による命中判定
+		if (!hit) {
+			for (var i1 = 0; i1 < gp.bs.bl.no && !hit; i1++) {
+				if (gp.bs.bl.ex[i1]) {
+					xb = gp.bs.bl.x[i1];
+					yb = gp.bs.bl.y[i1];
+					w  = gp.my.width / 2;
+					h  = gp.my.width / 2;
+					xt = gp.my.x + w;
+					yt = gp.my.y + h;
+					if (xb > xt-w && xb < xt+w && yb > yt-h && yb < yt+h) {
+						hit = true;
+						clearInterval(gp.timerID);   // タイマーの停止
+						gop_start();   // ゲームオーバー
+					}
+				}
+			}
+		}
+					// 敵機の弾による命中判定
+		if (!hit) {
+			for (var i1 = 0; i1 < gp.no && !hit; i1++) {
+				if (gp.ex[i1]) {
+					for (var i2 = 0; i2 < gp.em[i1].bl.no && !hit; i2++) {
+						if (gp.em[i1].bl.ex[i2]) {
+							var xb = gp.em[i1].bl.x[i2];
+							var yb = gp.em[i1].bl.y[i2];
+							var w  = gp.my.width / 2;
+							var h  = gp.my.width / 2;
+							var xt = gp.my.x + w;
+							var yt = gp.my.y + h;
+							if (xb > xt-w && xb < xt+w && yb > yt-h && yb < yt+h) {
+								hit = true;
+								clearInterval(gp.timerID);   // タイマーの停止
+								gop_start();   // ゲームオーバー
+							}
+						}
+					}
+				}
+			}
+		}
+						// カウントアップ
+		gp.ct = (gp.ct + 1) % 300;
+	}
+				//
+				// GamePanel オブジェクト（メソッド draw）
+				//
+	GamePanel.prototype.draw = function()
+	{
+						// キャンバスのクリア
+		mp.ctx.clearRect(0, 0, mp.canvas.width, mp.canvas.height);
+						// 描画
+								// 自機と弾
+		mp.ctx.drawImage(gp.my.image, gp.my.x, gp.my.y);
+		for (var i1 = 0; i1 < gp.my.bl.no; i1++) {
+			if (gp.my.bl.ex[i1]) {
+				mp.ctx.beginPath();
+			mp.ctx.fillStyle = "rgb(0, 255, 0)";
+				mp.ctx.arc(gp.my.bl.x[i1], gp.my.bl.y[i1], gp.my.bl.r, 0, 2*Math.PI);
+				mp.ctx.fill();
+			}
+		}
+								// ボスと弾
+		mp.ctx.drawImage(gp.bs.image, gp.bs.x, gp.bs.y);
+		for (var i1 = 0; i1 < gp.bs.bl.no; i1++) {
+			if (gp.bs.bl.ex[i1]) {
+				mp.ctx.beginPath();
+				mp.ctx.fillStyle = "rgb(255, 165, 0)";
+				mp.ctx.arc(gp.bs.bl.x[i1], gp.bs.bl.y[i1], gp.bs.bl.r, 0, 2*Math.PI);
+				mp.ctx.fill();
+			}
+		}
+							// 敵機と弾
+		for (var i1 = 0; i1 < gp.no; i1++) {
+			if (gp.ex[i1]) {
+			mp.ctx.drawImage(gp.em[i1].image, gp.em[i1].x, gp.em[i1].y);
+				for (var i2 = 0; i2 < gp.em[i1].bl.no; i2++) {
+					if (gp.em[i1].bl.ex[i2]) {
+						mp.ctx.beginPath();
+						mp.ctx.fillStyle = "rgb(255, 0, 0)";
+						mp.ctx.arc(gp.em[i1].bl.x[i2], gp.em[i1].bl.y[i2], gp.em[i1].bl.r, 0, 2*Math.PI);
+						mp.ctx.fill();
+					}
+				}
+			}
+		}
+	}
+				//
+				// GamePanel オブジェクト（メソッド onKeyDown）
+				//
+	GamePanel.prototype.onKeyDown = function(event)
+	{
+		if (event.keyCode == 38)   // 「↑」キー
+			gp.my.y -= gp.my.v;
+		else if (event.keyCode == 40)   // 「↓」キー
+			gp.my.y += gp.my.v;
+		else if (event.keyCode == 37)   // 「←」キー
+			gp.my.x -= gp.my.v;
+		else if (event.keyCode == 39)   // 「→」キー
+			gp.my.x += gp.my.v;
+		else if (event.keyCode == 32)   // 「スペース」キー
+			gp.my.bl.shoot();
+	}
+				//
+				// My オブジェクト（プロパティ）
+				//
+	function My()
+	{
+		this.image = new Image();   // 自機の画像
+		this.image.src = "image/my.gif";
+		this.width = 50;   // 自機の幅
+		this.height = 51;   // 自機の高さ
+		this.x = mp.canvas.width / 2 - this.width / 2;   // 自機の位置(横)
+		this.y = mp.canvas.height - this.height - 10;   // 自機の位置(縦)
+	this.v = 20;   // 移動キーが押されたときの移動量
+		this.bl = new Bullet();   // 弾
+		return this;
+	}
+				//
+				// Bullet オブジェクト（プロパティ）
+				//
+	function Bullet()
+	{
+		this.r = 12;   // 弾の半径
+		this.no = 15;   // 弾の全数
+		this.no_1 = 5;   // 一度に撃てる弾数
+		this.ct = 0;   // 現在の弾の数
+		this.x = new Array();   // 弾の位置(横)
+		this.y = new Array();   // 弾の位置(縦)
+		this.v = 30;   // 弾の速さ
+		this.fire = false;   // 弾を発射中か否か
+		this.ex = new Array();   // 弾の存在
+		for (var i1 = 0; i1 < this.no; i1++)
+			this.ex[i1] = false;
+	}
+				//
+				// Bullet オブジェクト（メソッド move）
+				//
+	Bullet.prototype.move = function()
+	{
+						// 弾の移動
+		for (var i1 = 0; i1 < gp.my.bl.no; i1++) {
+			if (gp.my.bl.ex[i1]) {
+				gp.my.bl.y[i1] -= gp.my.bl.v;
+				if (gp.my.bl.y[i1] < -gp.my.bl.r)
+					gp.my.bl.ex[i1] = false;
+			}
+		}
+						// 次の弾の発射
+		if (gp.my.bl.fire) {
+			if (gp.my.bl.ct < gp.my.bl.no_1) {
+				var sw = true;
+				for (var i1 = 0; i1 < gp.my.bl.no && sw; i1++) {
+					if (!gp.my.bl.ex[i1]) {
+						gp.my.bl.x[i1]  = gp.my.x + gp.my.width / 2;
+						gp.my.bl.y[i1]  = gp.my.y - gp.my.bl.r;
+						gp.my.bl.ex[i1] = true;
+						sw              = false;
+					}
+				}
+				gp.my.bl.ct++;
+				if (gp.my.bl.ct >= gp.my.bl.no_1) {
+					gp.my.bl.fire = false;
+					gp.my.bl.ct   = 0;
+				}
+			}
+		}
+	}
+				//
+				// Bullet オブジェクト（メソッド shoot，最初の弾の発射）
+				//
+	Bullet.prototype.shoot = function()
+	{
+		if (!gp.my.bl.fire) {
+			gp.my.bl.fire = true;
+			gp.my.bl.ct   = 1;
+			var sw = true;
+			for (var i1 = 0; i1 < gp.my.bl.no && sw; i1++) {
+			if (!gp.my.bl.ex[i1]) {
+					gp.my.bl.x[i1]  = gp.my.x + gp.my.width / 2;
+					gp.my.bl.y[i1]  = gp.my.y - gp.my.bl.r;
+					gp.my.bl.ex[i1] = true;
+					sw              = false;
+				}
+			}
+		}
+	}
+				//
+				// Boss オブジェクト（プロパティ）
+				//
+	function Boss()
+	{
+		this.image = new Image();   // ボス画像
+		this.image.src = "image/boss.gif";
+		this.width = 66;   // ボスの幅
+		this.height = 95;   // ボスの高さ
+		var a  = 100 + Math.floor((mp.canvas.width - 200 - this.width) * Math.random());
+		this.x = a;   // ボスの位置(横)
+		var b  = 10 + Math.floor(20 * Math.random());
+	    this.y = b;   // ボスの位置(縦)
+		this.bl = new Bullet_b();   // 弾
+		this.h_ct = 0;   // 命中した弾の数
+		this.h_max = 5;   // 耐えうる命中した弾の数
+						// 行動パターンの設定
+		this.ct = 1;
+	    this.ptn1 = new Array();
+		this.ptn1[0] = new Array(-5, 0, 50);
+		this.ptn1[1] = new Array(0, 20, 55);
+		this.ptn1[2] = new Array(5, 0, 105);
+		this.ptn1[3] = new Array(0, -20, 110);
+		this.ptn2 = new Array();
+		this.ptn2[0] = new Array(5, 0, 50);
+		this.ptn2[1] = new Array(0, 20, 55);
+		this.ptn2[2] = new Array(-5, 0, 105);
+		this.ptn2[3] = new Array(0, -20, 110);
+		this.ptn = new Array();
+		if (this.x > mp.canvas.width/2-this.width/2)
+			this.ptn = this.ptn1;
+		else
+			this.ptn = this.ptn2;
+		return this;
+	}
+				//
+				// Boss オブジェクト（メソッド move）
+				//
+	Boss.prototype.move = function()
+	{
+						// 移動
+		gp.bs.ct++;
+		if (gp.bs.ct > 110)
+			gp.bs.ct = 1;
+						// ボスの位置
+		var k = -1;
+		for (var i1 = 0; i1 < gp.bs.ptn.length-1 && k < 0; i1++) {
+			if (gp.bs.ct <= gp.bs.ptn[i1][2])
+				k = i1;
+		}
+		if (k < 0)
+			k = gp.bs.ptn.length - 1;
+		gp.bs.x += gp.bs.ptn[k][0];
+		gp.bs.y += gp.bs.ptn[k][1];
+						// 敵機の位置
+		if (gp.ex[0]) {
+			gp.em[0].x += gp.bs.ptn[k][0];
+			gp.em[0].y += gp.bs.ptn[k][1];
+		}
+		if (gp.ex[1]) {
+			gp.em[1].x += gp.bs.ptn[k][0];
+			gp.em[1].y += gp.bs.ptn[k][1];
+		}
+	}
+				//
+				// Bullet_b オブジェクト（プロパティ）
+				//
+	function Bullet_b()
+	{
+		this.r = 12;   // 弾の幅
+		this.no = 15;   // 弾の全数
+		this.x = new Array();   // 弾の位置(横)
+		this.y = new Array();   // 弾の位置(縦)
+		this.v = 30;   // 弾の速さ
+		this.vx = new Array();   // 横方向の弾の速さ
+		this.vy = new Array();   // 縦方向の弾の速さ
+		this.pr = 5;   // 弾の発射間隔
+		this.ct = 0;
+		this.ex = new Array();   // 弾の存在
+		for (var i1 = 0; i1 < this.no; i1++)
+			this.ex[i1] = false;
+	}
+				//
+				// Bullet_b オブジェクト（メソッド move）
+				//
+	Bullet_b.prototype.move = function()
+	{
+						// 弾の移動
+		for (var i1 = 0; i1 < gp.bs.bl.no; i1++) {
+			if (gp.bs.bl.ex[i1]) {
+				gp.bs.bl.x[i1] += gp.bs.bl.vx[i1];
+				gp.bs.bl.y[i1] += gp.bs.bl.vy[i1];
+				if (gp.bs.bl.x[i1] < -gp.bs.bl.r ||
+			    gp.bs.bl.x[i1] > mp.canvas.width+gp.bs.bl.r ||
+				    gp.bs.bl.y[i1] > mp.canvas.height+gp.bs.bl.r)
+					gp.bs.bl.ex[i1] = false;
+			}
+	}
+						// 次の弾の発射
+		gp.bs.bl.ct = (gp.bs.bl.ct + 1) % gp.bs.bl.pr;
+		if (gp.bs.bl.ct == 0)
+			gp.bs.bl.shoot();
+	}
+				//
+				// Bullet_b オブジェクト（メソッド shoot，弾の発射）
+				//
+	Bullet_b.prototype.shoot = function()
+	{
+		var sw = true;
+		for (var i1 = 1; i1 < gp.bs.bl.no && sw; i1++) {
+			if (!gp.bs.bl.ex[i1]) {
+				sw = false;
+				gp.bs.bl.ex[i1] = true;
+				gp.bs.bl.x[i1]  = gp.bs.x + gp.bs.width / 2;
+				gp.bs.bl.y[i1]  = gp.bs.y + gp.bs.height + gp.bs.bl.r;
+				var yt  = gp.my.y + gp.my.height / 2 - gp.bs.bl.y[i1];
+				var xt  = gp.my.x + gp.my.width / 2 - gp.bs.bl.x[i1];
+				var ang = Math.atan2(yt, xt);
+			gp.bs.bl.vx[i1] = Math.floor(gp.bs.bl.v * Math.cos(ang) + 0.5);
+				gp.bs.bl.vy[i1] = Math.floor(gp.bs.bl.v * Math.sin(ang) + 0.5);
+			}
+		}
+	}
+				//
+				// Enemy オブジェクト（プロパティ）
+				//
+	function Enemy(sw, bs)
+	{
+		this.image = new Image();   // 敵機画像
+		this.image.src = "image/enemy.gif";
+		this.width = 27;   // 敵機の幅
+		this.height = 41;   // 敵機の高さ
+		this.x;   // 敵機の位置(横)
+	this.y;   // 敵機の位置(縦)
+		this.bl = new Bullet_e();   // 弾
+						// 敵機の初期位置
+		if (sw == 0) {
+			this.x = bs.x - 150 + Math.floor(100 * Math.random());
+			this.y = bs.y + bs.height - 80 + Math.floor(100 * Math.random());
+		}
+		else {
+			this.x = bs.x + bs.width + 50 + Math.floor(100 * Math.random());
+			this.y = bs.y + bs.height - 80 + Math.floor(100 * Math.random());
+		}
+		return this;
+	}
+				//
+				// Bullet_e オブジェクト（プロパティ）
+				//
+	function Bullet_e()
+	{
+		this.r = 7;   // 弾の幅
+		this.no = 5;   // 弾の全数
+		this.ct = 0;   // 現在の弾の数
+		this.x = new Array();   // 弾の位置(横)
+		this.y = new Array();   // 弾の位置(縦)
+		this.v = 30;   // 弾の速さ
+		this.vx = new Array();   // 横方向の弾の速さ
+		this.vy = new Array();   // 縦方向の弾の速さ
+		this.ex = new Array();   // 弾の存在
+		for (var i1 = 0; i1 < this.no; i1++)
+			this.ex[i1] = false;
+	}
+				//
+				// Bullet_e オブジェクト（メソッド move）
+				//
+	Bullet_e.prototype.move = function(em)
+	{
+		if (em.bl.ct < em.bl.no)
+			em.bl.ct++;
+				// 弾の移動
+		var sw = false;
+		for (var i1 = 0; i1 < em.bl.no; i1++) {
+			if (em.bl.ex[i1]) {
+				em.bl.x[i1] += em.bl.vx;
+				em.bl.y[i1] += em.bl.vy;
+				if (em.bl.x[i1] < -em.bl.r || em.bl.x[i1] > mp.canvas.width+em.bl.r ||
+				    em.bl.y[i1] > mp.canvas.height+em.bl.r)
+					em.bl.ex[i1] = false;
+				else
+					sw = true;
+			}
+		}
+				// 最初の弾の発射
+		if (!sw)
+			em.bl.shoot(em);
+				// 次の弾の発射
+		else {
+			if (em.bl.ct < em.bl.no) {
+				em.bl.x[em.bl.ct]  = em.x + em.width / 2;
+				em.bl.y[em.bl.ct]  = em.y + em.height + em.bl.r;
+				em.bl.ex[em.bl.ct] = true;
+			}
+		}
+	}
+				//
+				// Bullet_e オブジェクト（メソッド shoot，弾の発射）
+				//
+	Bullet_e.prototype.shoot = function(em)
+	{
+		em.bl.ct    = 0;
+		em.bl.ex[0] = true;
+		for (var i1 = 1; i1 < em.bl.no; i1++)
+			em.bl.ex[i1] = false;
+		var ang    = 0.25 * Math.PI + 0.5 * Math.PI * Math.random();
+		em.bl.vx   = Math.floor(em.bl.v * Math.cos(ang) + 0.5);
+		em.bl.vy   = Math.floor(em.bl.v * Math.sin(ang) + 0.5);
+	em.bl.x[0] = em.x + em.width / 2;
+		em.bl.y[0] = em.y + em.height + em.bl.r;
+	}
+    </script>
+    <script>
+    		//
+			// GameClearPanel の開始
+			//
+function gcp_start()
+{
+					// キャンバスのクリア
+	mp.ctx.clearRect(0, 0, mp.canvas.width, mp.canvas.height);
+					// タイトルの表示
+	mp.ctx.font = "40px 'ＭＳ ゴシック'";
+	mp.ctx.textBaseline = "middle";
+	mp.ctx.textAlign = "center";
+	mp.ctx.fillStyle = "rgb(0, 0, 0)";
+	mp.ctx.fillText("Game Clear!", mp.canvas.width/2, mp.canvas.height/2);
+					// ボタンの表示制御
+	document.getElementById('method').style.display = "none";
+	if (mp.level > 1) {   // 最初からゲーム再開
+		document.getElementById('start').style.display = "none";
+		document.getElementById('first').style.display = "";
+	}
+	else {   // レベルアップ
+		mp.level++;
+		document.getElementById('start').style.display = "";
+		document.getElementById('first').style.display = "none";
+		document.getElementById('start').innerHTML = "次のレベル";
+	}
+	document.getElementById('finish').style.display = "";
+	document.getElementById('clear').style.display = "none";
+	document.getElementById('over').style.display = "none";
+}
+    </script>
+</HEAD>
+<BODY CLASS="eeffee" onLoad="mp_start()">
+	<H1>シューティングゲーム：ステップ１</H1>
+	<CANVAS ID="canvas_e" STYLE="background-color: #ffffff;" WIDTH="500" HEIGHT="500" TABINDEX="1"></CANVAS><BR>
+	<A HREF="method.htm" TARGET="method"><BUTTON ID="method" CLASS="std">遊び方</BUTTON></A>
+	<BUTTON ID="start" CLASS="std" onClick="gp_start()">ゲーム開始</BUTTON>
+	<BUTTON ID="first" CLASS="std" onClick="st_start()">最初から再開</BUTTON>
+	<BUTTON ID="finish" CLASS="std" onClick="mp.finish()">ゲーム終了</BUTTON>
+	<BUTTON ID="clear" CLASS="std" onClick="gp.next(0)">ゲームクリア</BUTTON>
+	<BUTTON ID="over" CLASS="std" onClick="gp.next(1)">ゲームオーバー</BUTTON>
+</BODY>
+</HTML>
+				
