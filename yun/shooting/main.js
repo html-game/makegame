@@ -40,7 +40,7 @@ SceneTitle.prototype = {
 		ctx.drawImage(this.imageTitle, S_WIDTH / 2 - 299 / 2, 150);
 		
 		/* タイトル　フォントサイズ */
-		ctx.font = "35px '�l�r �S�V�b�N'";
+		ctx.font = "35px 'arial'";
 		// 線のスタイルカラー
 		ctx.strokeStyle = "green";
 		// タイトルメッセージ
@@ -897,7 +897,7 @@ Score.prototype = {
 		var Y_MARGIN = 5;
 		
 		/* フォントのサイズ・線のカラー */
-		ctx.font = "25px '�l�r �S�V�b�N'";
+		ctx.font = "25px 'arial'";
 		ctx.fillStyle = "green";
 		ctx.strokeStyle = "green";
 	
@@ -944,7 +944,7 @@ Life.prototype = {
 		var Y_MARGIN = 5;
 		
 		/* フォントのサイズ・線のカラー */
-		ctx.font = "25px '�l�r �S�V�b�N'";
+		ctx.font = "25px 'arial'";
 		ctx.fillStyle = "green";
 		ctx.strokeStyle = "green";
 	
