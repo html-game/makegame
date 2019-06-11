@@ -498,10 +498,10 @@ var Player = function (image) {
 
 	this.x       = 0;
 	this.y       = 0;
-	this.w       = 21;
-	this.h       = 30;
-	this.iw      = 45;
-	this.ih      = 52;
+	this.w       = 30;
+	this.h       = 21;
+	this.iw      = 52;
+	this.ih      = 42;
 	
 	this.move    = 3;
 	
@@ -566,8 +566,8 @@ Player.prototype = {
 		if (keyEvent.z && this.shootDelay <= 0) {
 			s = new PlayerBullet();
 			s.init();
-			s.x = this.x + (this.iw / 2) - (s.w / 2);
-			s.y = this.y;
+			s.x = this.x + this.iw;
+			s.y = this.y + (this.iw / 2) - (s.w / 2);
 			
 			this.shootDelay = 10;
 		}
