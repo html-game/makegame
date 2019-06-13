@@ -120,7 +120,7 @@ SceneMain.prototype = {
 			var rand = Math.floor( Math.random() * 100 );
 			
 			// 敵２の出現確率
-			if (rand % 7 == 0) {
+			if (rand % 8 == 0) {
 			
 				var o = new EnemyDash(this.imageManager.getImage("img/enemy-dash.png"), this.player);
                 o.init();
@@ -132,7 +132,7 @@ SceneMain.prototype = {
 				this.objects.push(o);
 			
 			// 敵１の出現確率
-			} else {
+			} else if(rand % 5 == 0){
 			
 			
 				var o = new Enemy(this.imageManager.getImage("img/enemy.png"));
@@ -505,7 +505,7 @@ var Player = function (image) {
 	
 	this.move    = 3;
 	
-	this.hp      = 3;   //ライフの数
+	this.hp      = 5;   //ライフの数
 	this.attack  = 1;
 	
 	this.image = image;
@@ -541,7 +541,7 @@ Player.prototype = {
 		}
 		// xを押すと移動スピードが半分になる
 		if (keyEvent.x)    {
-			this.move = 1.5;
+			this.move = 1;
 		} else {
 			this.move = 3;
 		}
@@ -623,7 +623,7 @@ var Enemy = function (image) {
 	this.iw      = 38;
 	this.ih      = 42;
 	
-	this.move    = 2;    // 移動スピード
+	this.move    = 1.5;    // 移動スピード
 	
 	this.hp      = 1;    // ヒットポイント（ライフ）
 	this.attack  = 1;    // 攻撃力
@@ -660,7 +660,7 @@ var EnemyDash = function (image, player) {
 	this.iw      = 32;
 	this.ih      = 40;
 	
-	this.move     = 3;
+	this.move     = 2;
 	this.moveX    = this.move;
 	this.moveY    = 0;
 	this.hover    = 0;
