@@ -1,0 +1,17 @@
+
+.backgrounds{
+    background-image: url(index_backgrounds.png);
+    background-size: 100% 400%;
+}
+
+h1{
+    
+    font-family: "Yu Gothic", "游ゴシック", YuGothic, "游ゴシック体";
+    font-size: 100px;
+    position: center;
+}
+
+h2{
+    font-family: "Yu Gothic", "游ゴシック", YuGothic, "游ゴシック体";
+    font-size: 50px;
+}
